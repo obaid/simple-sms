@@ -1,19 +1,21 @@
 <?php
+
 namespace SimpleSoftwareIO\SMS;
 
 use GuzzleHttp\Client;
 use Illuminate\Support\Manager;
-use SimpleSoftwareIO\SMS\Drivers\LogSMS;
-use SimpleSoftwareIO\SMS\Drivers\EmailSMS;
-use SimpleSoftwareIO\SMS\Drivers\MozeoSMS;
-use SimpleSoftwareIO\SMS\Drivers\NexmoSMS;
-use SimpleSoftwareIO\SMS\Drivers\PlivoSMS;
-use SimpleSoftwareIO\SMS\Drivers\TwilioSMS;
-use SimpleSoftwareIO\SMS\Drivers\ZenviaSMS;
 use SimpleSoftwareIO\SMS\Drivers\CallFireSMS;
+use SimpleSoftwareIO\SMS\Drivers\EmailSMS;
 use SimpleSoftwareIO\SMS\Drivers\EZTextingSMS;
 use SimpleSoftwareIO\SMS\Drivers\FlowrouteSMS;
 use SimpleSoftwareIO\SMS\Drivers\LabsMobileSMS;
+use SimpleSoftwareIO\SMS\Drivers\LogSMS;
+use SimpleSoftwareIO\SMS\Drivers\MozeoSMS;
+use SimpleSoftwareIO\SMS\Drivers\NexmoSMS;
+use SimpleSoftwareIO\SMS\Drivers\PlivoSMS;
+use SimpleSoftwareIO\SMS\Drivers\SMS77;
+use SimpleSoftwareIO\SMS\Drivers\TwilioSMS;
+use SimpleSoftwareIO\SMS\Drivers\ZenviaSMS;
 
 class DriverManager extends Manager
 {
@@ -59,7 +61,7 @@ class DriverManager extends Manager
         $config = $this->app['config']->get('sms.callfire', []);
 
         $provider = new CallFireSMS(
-            new Client,
+            new Client(),
             $config['app_login'],
             $config['app_password']
         );
@@ -91,7 +93,7 @@ class DriverManager extends Manager
         $provider = new EZTextingSMS(new Client());
 
         $data = [
-            'User' => $config['username'],
+            'User'     => $config['username'],
             'Password' => $config['password'],
         ];
 
@@ -134,8 +136,8 @@ class DriverManager extends Manager
 
         $auth = [
             'companykey' => $config['company_key'],
-            'username' => $config['username'],
-            'password' => $config['password'],
+            'username'   => $config['username'],
+            'password'   => $config['password'],
         ];
         $provider->buildBody($auth);
 
@@ -177,11 +179,11 @@ class DriverManager extends Manager
         );
     }
 
-    /**
-     * Create an instance of the Zenvia driver.
-     *
-     * @return ZenviaSMS
-     */
+     /**
+      * Create an instance of the Zenvia driver.
+      *
+      * @return ZenviaSMS
+      */
      protected function createZenviaDriver()
      {
          $config = $this->app['config']->get('sms.zenvia', []);
@@ -214,7 +216,7 @@ class DriverManager extends Manager
     }
 
     /**
-     * Create an instance of the flowroute driver
+     * Create an instance of the flowroute driver.
      *
      * @return FlowrouteSMS
      */
@@ -223,9 +225,28 @@ class DriverManager extends Manager
         $config = $this->app['config']->get('sms.flowroute', []);
 
         $provider = new FlowrouteSMS(
-            new Client,
+            new Client(),
             $config['access_key'],
             $config['secret_key']
+        );
+
+        return $provider;
+    }
+
+    /**
+     * Create an instance of the SMS77 driver
+     *
+     * @return SMS77
+     */
+    protected function createSms77Driver()
+    {
+        $config = $this->app['config']->get('sms.sms77', []);
+
+        $provider = new SMS77(
+            new Client,
+            $config['user'],
+            $config['api_key'],
+            $config['debug']
         );
 
         return $provider;
